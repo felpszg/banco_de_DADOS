@@ -1,46 +1,47 @@
--- Active: 1787176816834@@127.0.0.1@5432@bd_aula@public
+-- Active: 1787269659703@@127.0.0.1@5432@bd_aula@public
 CREATE TABLE curso(
     id_curso INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nome VARCHAR(60) NOT NULL
+    nome VARCHAR(60) NOT NULL UNIQUE
 );
+
 CREATE TABLE aluno(
     id_aluno INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome VARCHAR(80) NOT NULL,
     id_curso INTEGER NOT NULL REFERENCES curso(id_curso)
 );
 
-SELECT * FROM  curso;
+DROP TABLE aluno;
 
-SELECT id_curso FROM  curso;
-SELECT nome FROM  curso;
+DROP TABLE curso;
 
-SELECT * FROM  aluno;
+SELECT * FROM curso;
 
-SELECT id_aluno FROM  aluno;
-SELECT id_curso FROM  aluno;
-SELECT nome FROM  aluno;
+SELECT * FROM aluno;
 
 INSERT INTO curso (nome) VALUES
 ('Sistemas de Informacao'),
 ('Administracao'),
 ('Direito'),
-('Ciencia da computacao');
+('Ciencia da Computacao');
 
-INSERT INTO aluno (nome,id_curso) VALUES
-('Ana Beatriz Sousa' , 1),
-('Carlos Henrique Lemos' , 1),
-('Pedro Mestre Mago' , 2),
-('Davi Senior Silva' , 3),
-('Gustavo Pereira Manuel' , 1);
 
-SELECT 
-    a.id_aluno AS id,
-    a.nome AS alunos,
-    a.id_curso
+INSERT INTO aluno (nome, id_curso) VALUES
+('Ana Beatriz Souza', 1),
+('Carlos Henrique Lima', 1),
+('Daniela Martins', 2),
+('Eduardo Pereira', 3),
+('Fernanda Rocha', 1);
+
+
+SELECT
+    id_aluno AS id,
+    nome AS alunos,
+    id_curso
 FROM
-    aluno a 
+    aluno 
 ORDER BY
     nome ASC;
+
 
 SELECT
     id_curso AS id,
@@ -48,12 +49,69 @@ SELECT
 FROM
     curso
 ORDER BY
-    nome ASC;
+    nome;
+
 
 SELECT
-    nome AS aluno,
-     id_curso AS id
+    nome,
+    id_curso
 FROM
     aluno
 WHERE
     id_curso = 1;
+
+
+SELECT table_name,
+       column_name,
+       data_type,
+       character_maximum_length AS tamanho,
+       is_nullable              AS aceita_nulo,
+       is_identity              AS e_identidade
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name IN ('curso', 'aluno')
+ORDER BY table_name, ordinal_position;
+
+
+
+SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'curso';
+
+SELECT
+    c.nome AS CURSO,
+    c.id_curso
+FROM
+    curso c
+WHERE
+    c.nome = 'Sistemas de Informacao';
+
+
+
+--alunos e os cursos hihihiha
+SELECT 
+    a.nome AS aluno,
+    c.nome AS curso
+FROM 
+    aluno a 
+    JOIN   
+        curso c
+    ON
+        c.id_curso = a.id_curso
+    ORDER BY
+    c.nome ASC;
+
+
+--Qtd de alunos por curso
+SELECT
+    c.nome AS CURSO,
+    COUNT(a.id_aluno) AS qtd_alunos
+FROM
+    curso c
+    JOIN
+        aluno a
+    ON
+        a.id_curso = c.id_curso
+GROUP BY
+    c.nome
+ORDER BY
+    qtd_alunos DESC;
+
