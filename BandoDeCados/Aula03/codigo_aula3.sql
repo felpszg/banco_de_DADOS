@@ -1,4 +1,4 @@
--- Active: 1787874139182@@127.0.0.1@5432@bd_vendas@public
+-- Active: 1788385508024@@127.0.0.1@5432@bd_vendas@public
 DROP TABLE IF EXISTS vendas_itens;
 
 CREATE TABLE vendas_itens(
@@ -147,3 +147,116 @@ WHERE
     valor_unitario BETWEEN 50 AND 100
 ORDER BY
     valor_unitario DESC;
+
+
+SELECT
+    venda_id, produto_id, valor_unitario, data_venda
+FROM
+    vendas_itens
+WHERE
+    valor_unitario NOT BETWEEN 50 AND 100
+ORDER BY
+    valor_unitario DESC;
+
+SELECT
+    venda_id,produto_id,valor_unitario,data_venda
+FROM
+    vendas_itens
+WHERE
+    produto_id IN (1,3,6)
+ORDER BY
+    produto_id;
+
+SELECT
+    venda_id,produto_id,valor_unitario,data_venda
+FROM
+    vendas_itens
+WHERE
+    produto_id NOT IN (1,3,6)
+ORDER BY
+    produto_id;
+
+SELECT
+    venda_id,produto_id,observacao
+FROM
+    vendas_itens
+WHERE
+    observacao LIKE 'Entrega%';
+
+SELECT
+    venda_id,produto_id,observacao
+FROM
+    vendas_itens
+WHERE
+    --observacao LIKE '%Entrega%'
+    --observacao ILIKE '%loja%'
+    --observacao ILIKE '%LoJa%'
+    --observacao LIKE '%a%'
+    --observacao LIKE '_ntrega%'
+
+
+SELECT
+    venda_id,observacao
+FROM
+    vendas_itens
+WHERE
+    observacao IS NULL;
+
+
+SELECT
+    venda_id,observacao
+FROM
+    vendas_itens
+WHERE
+    observacao IS NOT NULL;
+
+
+SELECT
+    venda_id,observacao
+FROM
+    vendas_itens
+WHERE
+    observacao IN ('Entrega expressa', 'Entrega agendada')
+
+SELECT
+    venda_id,observacao
+FROM
+    vendas_itens
+WHERE
+    observacao NOT IN ('Entrega expressa', 'Entrega agendada') OR observacao IS NULL;
+
+
+
+SELECT
+    venda_id, produto_id,
+    COALESCE(observacao,'Nenhuma observação') AS observacao --substitui dados que forem NULL por algum texto q vc quiser, isso é bao pra relatorios 
+FROM
+    vendas_itens
+WHERE
+    venda_id = 2001
+
+
+SELECT DISTINCT --nao mostra dados repetidos !!!
+    valor_unitario
+FROM
+    vendas_itens
+WHERE
+    produto_id = 5
+ORDER BY
+    valor_unitario
+
+SELECT
+    venda_id,produto_id,valor_unitario
+FROM
+    vendas_itens
+ORDER BY
+    valor_unitario,
+    venda_id,
+    produto_id;
+
+SELECT
+    venda_id,observacao
+FROM
+    vendas_itens
+ORDER BY
+    observacao ASC NULLS FIRST;
