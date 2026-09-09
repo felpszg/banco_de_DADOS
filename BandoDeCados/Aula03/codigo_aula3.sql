@@ -1,4 +1,4 @@
--- Active: 1788480332208@@127.0.0.1@5432@bd_vendas@public
+-- Active: 1788992417143@@127.0.0.1@5432@bd_vendas@public
 DROP TABLE IF EXISTS vendas_itens;
 
 CREATE TABLE vendas_itens (
@@ -600,3 +600,5 @@ GROUP BY
 ORDER BY
     valor_total_produto ASC,
     produto_id ASC;
+
+
