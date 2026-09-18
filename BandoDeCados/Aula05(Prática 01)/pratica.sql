@@ -1,5 +1,5 @@
--- Active: 1789596222297@@127.0.0.1@5432@bd_hortifruti@public
-CREATE DATABASE bd_hortifruti;
+-- Active: 1789689778451@@127.0.0.1@5432@bd_hortifruti@public
+--CREATE DATABASE bd_hortifruti;
 
 DROP TABLE IF EXISTS itens_venda;
 
@@ -100,6 +100,7 @@ ORDER BY
     produto_nome ASC;
 
 
+
 --Consulta 2
 SELECT
     venda_id,
@@ -117,6 +118,7 @@ ORDER BY
     valor_unitario DESC,
     venda_id;
     
+
     
 --Consulta 3
 SELECT
@@ -132,6 +134,8 @@ ORDER BY
     data_venda,
     venda_id;
 
+
+
 --Consulta 4
 SELECT DISTINCT
     venda_id,
@@ -143,6 +147,7 @@ WHERE
     bairro_entrega IS NOT NULL
 ORDER BY  
     venda_id;
+
 
 
 --Expressões e agregações
@@ -161,6 +166,8 @@ ORDER BY
     venda_id ASC
 LIMIT 5
 OFFSET 5;
+
+
 
 --Consulta 6
 SELECT
@@ -182,6 +189,8 @@ GROUP BY
 ORDER BY
     valor_total DESC;
 
+
+
 --Consulta 7
 SELECT
     data_venda,
@@ -194,6 +203,8 @@ GROUP BY
     data_venda
 ORDER BY
     data_venda
+
+
 
 --Consulta 8
 SELECT
@@ -214,4 +225,53 @@ GROUP BY
 ORDER BY
     faturamento DESC;
 
+
+
 --Consulta 9
+SELECT
+    categoria,
+    COUNT(*) AS itens,
+    unidade,
+    SUM(quantidade) AS qtd_total,
+    ROUND(SUM(valor_unitario*quantidade),2) AS faturamento
+FROM
+    itens_venda
+GROUP BY
+    categoria,
+    unidade
+ORDER BY
+    categoria;
+
+
+
+--Consulta 10
+SELECT
+    bairro_entrega,
+    COUNT(*) AS entregas,
+    ROUND(SUM(valor_unitario * quantidade), 2) AS faturamento
+FROM
+    itens_venda
+WHERE
+    bairro_entrega IS NOT NULL
+GROUP BY
+    bairro_entrega
+HAVING
+    SUM(valor_unitario * quantidade) >= 40
+ORDER BY
+    faturamento DESC;
+
+
+--Consulta 11
+SELECT
+    venda_id,
+    ROUND(SUM(valor_unitario*quantidade),2) AS total_arredondado,
+    SUM(ROUND(valor_unitario * quantidade, 2)) AS soma_dos_itens_arredondados
+FROM
+    itens_venda
+GROUP BY
+    venda_id
+HAVING
+ROUND(SUM(valor_unitario*quantidade),2) !=  SUM(ROUND(valor_unitario * quantidade, 2))
+ORDER BY
+    venda_id ASC;
+
