@@ -1,4 +1,4 @@
--- Active: 1789689778451@@127.0.0.1@5432@bd_hortifruti@public
+-- Active: 1791409986913@@127.0.0.1@5432@bd_hortifruti@public
 --CREATE DATABASE bd_hortifruti;
 
 DROP TABLE IF EXISTS itens_venda;
@@ -76,7 +76,7 @@ INSERT INTO itens_venda
 VALUES
 (3017,'2026-08-08',NULL,5,'Tomate','Legume','Kg',1.340,8.99),
 (3017,'2026-08-08',NULL,10,'Alface crespa','Verdura','UN',2, 3.49),
-(3017,'2026-08-08',NULL,4,'Morango','Fruta','Kg',1, 9.90);
+(3017,'2026-08-08',NULL,4,'Morango','Fruta','UN',1, 9.90);
 
 
 --2.5
@@ -275,3 +275,239 @@ ROUND(SUM(valor_unitario*quantidade),2) !=  SUM(ROUND(valor_unitario * quantidad
 ORDER BY
     venda_id ASC;
 
+--PARTE 4
+
+--QUESTÃO 1: As colunas data_venda e bairro_entrega se repetem porque pertencem à venda. Já produto_nome, categoria e unidade se repetem porque pertencem ao produto.
+--O valor_unitario é diferente, pois pode variar de uma venda para outra.
+--Se o nome de um produto fosse alterado em apenas algumas linhas, na Consulta 1 o mesmo produto poderia aparecer mais de uma vez. Na Consulta 8, ele seria dividido em grupos diferentes, alterando os cálculos.
+
+
+--QUESTÃO 2: 
+--1-Uma venda deveria ter sempre a mesma data e bairro.
+--2-Um produto deveria ter sempre o mesmo nome, categoria e unidade.
+
+--Exemplo de INSERT inválido para a regra, mas aceito pelo banco:
+--INSERT INTO itens_venda
+--(venda_id, data_venda, produto_id, produto_nome, categoria, unidade, quantidade, valor_unitario)
+--VALUES
+--(3001, '2026-08-09', 1, 'Banana prata', 'Fruta', 'Kg', 1, 5.99);
+
+
+--QUESTÃO 3:
+--No morango, a maior quantidade foi vendida por um preço menor, então a média ponderada fica menor.
+--No abacaxi, a maior quantidade foi vendida pelo preço maior, então a média ponderada fica maior.
+--No cheiro-verde, todos os preços são R$ 2,50, então a média simples e a ponderada são iguais.
+
+
+
+
+-- Continuação 
+
+SELECT
+    COUNT(*) AS linhas
+FROM
+    itens_venda;
+
+DROP TABLE IF EXISTS vendas;
+
+DROP TABLE IF EXISTS produto;
+
+
+--O tomate e a tabela única
+
+SELECT
+    id,
+    venda_id,
+    produto_id,
+    produto_nome,
+    categoria
+FROM
+    itens_venda
+WHERE
+    produto_id = 5
+ORDER BY
+    venda_id;
+
+UPDATE tabela
+SET coluna1 = valor1,
+    coluna2 = valor2
+WHERE
+    condicao; 
+    
+
+UPDATE itens_venda
+SET categoria = 'Fruta'
+WHERE
+    produto_id = 5;
+
+
+CREATE TABLE
+    produto(
+        id INTEGER PRIMARY KEY,
+        nome TEXT NOT NULL UNIQUE,
+        categoria TEXT NOT NULL CHECK(categoria IN ('Fruta', 'Legume', 'Verdura')),
+        unidade TEXT NOT NULL CHECK(unidade IN ('Kg', 'UN'))
+    );
+
+
+INSERT INTO produto(id, nome, categoria, unidade)
+SELECT DISTINCT
+    produto_id,
+    produto_nome,
+    categoria,
+    unidade
+FROM
+    itens_venda;
+
+
+SELECT
+    *
+FROM
+    produto;
+
+ALTER TABLE itens_venda
+    ADD CONSTRAINT fk_itens_venda_produto
+    FOREIGN KEY (produto_id)
+    REFERENCES produto(id);
+
+ALTER TABLE itens_venda
+    DROP COLUMN produto_nome,
+    DROP COLUMN categoria,
+    DROP COLUMN unidade;
+
+SELECT
+    *
+FROM
+    produto;
+WHERE 
+    id = 2;
+
+
+SELECT
+    i.id,
+    i.venda_id,
+    p.nome AS produto,
+    p.categoria,
+    p.unidade,
+    i.quantidade,
+    i.valor_unitario
+FROM
+    itens_venda AS i
+    INNER JOIN
+    produto AS p
+    ON 
+        p.id = i.produto_id
+WHERE
+    i.venda_id = 3017
+ORDER BY
+    i.id;
+
+
+SELECT
+    p.id,
+    p.nome,
+    p.unidade,
+    ROUND(SUM(i.quantidade),2)  AS quantidade,
+    ROUND(SUM(i.quantidade * i.valor_unitario),2) AS faturamento,
+    ROUND(AVG(i.valor_unitario)) AS media_simples,
+    ROUND(SUM(i.quantidade * i.valor_unitario)/SUM(i.quantidade),2) AS media_ponderada
+FROM
+        itens_venda AS i
+    INNER JOIN
+        produto AS p
+    ON 
+        p.id = i.produto_id
+GROUP BY
+    p.id,
+    p.nome,
+    p.unidade
+ORDER BY
+    faturamento DESC;
+
+
+SELECT
+    p.categoria,
+    COUNT(*) AS itens,
+    p.unidade,
+    ROUND(SUM(i.quantidade),2) AS qtd_total,
+    ROUND(SUM(i.valor_unitario*i.quantidade),2) AS faturamento
+FROM
+    itens_venda AS i INNER JOIN produto AS p ON p.id = i.produto_id
+GROUP BY
+    p.categoria,
+    p.unidade
+ORDER BY
+    categoria;
+
+
+-- LEFT JOIN : PRODUTOS QUE NÃO ESTÃO EM ITENS VENDAS, QUANTIDADE VENDIDA DE CADA PRODUTO
+SELECT
+    p.id,
+    p.nome,
+    COUNT(i.id) AS itens_vendidos
+--LEFT INNER E RIGHT JOIN 😂😂😂😂😂👌
+FROM produto AS p RIGHT JOIN itens_venda AS i ON p.id = i.produto_id
+GROUP BY
+    p.id,
+    p.nome
+ORDER BY
+    p.id;
+
+INSERT INTO produto(id, nome, categoria, unidade)
+VALUES(13,'Pimentão', 'Legume', 'Kg')
+
+
+
+--INSERT INTO itens_venda(venda_id, data_venda, bairro_entrega, produto_id, quantidade, valor_unitario)
+--VALUES(3018,'2026-08-09','Centro',13,0.8, 8.89)
+
+
+
+SELECT DISTINCT
+    p.id,
+    p.nome,
+    p.categoria
+FROM
+    produto AS p
+RIGHT JOIN 
+    itens_venda AS i
+ON i.produto_id = p.id
+WHERE
+    i.id IS NOT NULL
+ORDER BY
+    p.id;
+
+
+
+-- TABELA: VENDAS
+SELECT
+    *
+FROM
+    itens_venda
+
+
+
+
+DROP TABLE IF EXISTS vendas;
+
+CREATE TABLE vendas(
+    id INTEGER PRIMARY KEY,
+    data_venda DATE NOT NULL,
+    bairro_entrega TEXT
+);
+
+
+
+INSERT INTO vendas(id, data_venda, bairro_entrega)
+SELECT DISTINCT
+    venda_id,
+    data_venda,
+    bairro_entrega
+FROM
+    itens_venda;
+
+
+SELECT
+*
+FROM
+vendas;
