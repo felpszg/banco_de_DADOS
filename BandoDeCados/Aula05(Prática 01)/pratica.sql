@@ -1,4 +1,4 @@
--- Active: 1791409986913@@127.0.0.1@5432@bd_hortifruti@public
+-- Active: 1791502916549@@127.0.0.1@5432@bd_hortifruti@public
 --CREATE DATABASE bd_hortifruti;
 
 DROP TABLE IF EXISTS itens_venda;
@@ -507,7 +507,71 @@ FROM
     itens_venda;
 
 
+
 SELECT
 *
 FROM
 vendas;
+
+
+ALTER TABLE itens_venda
+    ADD CONSTRAINT fk_itens_venda_venda
+    FOREIGN KEY (venda_id) REFERENCES vendas(id);
+
+ALTER TABLE itens_venda
+    DROP COLUMN data_venda,
+    DROP COLUMN bairro_entrega;
+
+
+SELECT 
+    p.nome AS produto,
+    v.data_venda,
+    i.quantidade,
+    i.valor_unitario
+FROM
+vendas AS v
+INNER JOIN 
+itens_venda AS i
+ON
+i.venda_id = v.id
+INNER JOIN
+produto AS p
+ON
+i.produto_id = p.id
+WHERE p.id = 5
+ORDER BY v.data_venda;
+
+
+ALTER TABLE itens_venda
+    ADD CONSTRAINT uq_itens_venda_venda_produto
+    UNIQUE (venda_id, produto_id);
+
+ALTER TABLE itens_venda
+    ADD CONSTRAINT ck_itens_venda_quantidade
+    CHECK(quantidade > 0);
+
+-- Buscar valor total de cada venda. vendaid, datavenda, bairro, qtd, valor total
+
+SELECT
+    i.venda_id,
+    v.data_venda,
+    COUNT(i.id) AS itens,
+    ROUND(SUM(i.quantidade*i.valor_unitario),2) AS valor_total,
+    COALESCE(v.bairro_entrega,'Retirada na loja') AS destino
+FROM
+vendas AS v INNER JOIN itens_venda AS i ON i.venda_id = v.id
+GROUP BY
+    i.venda_id,
+    v.data_venda,
+    v.bairro_entrega
+ORDER BY
+    i.venda_id;
+
+
+INSERT INTO vendas(id, data_venda, bairro_entrega)
+VALUES(3018, '2026-08-10','Centro');
+
+INSERT INTO itens_venda(venda_id, produto_id, quantidade, valor_unitario)
+VALUES(3018, 13, 0.450, 9.98),
+(3018, 5, 1.120, 8.89),
+(3018, 1, 1.600, 6.49);
