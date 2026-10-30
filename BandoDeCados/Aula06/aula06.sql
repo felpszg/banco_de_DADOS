@@ -1,4 +1,4 @@
--- Active: 1793224551448@@127.0.0.1@5432@bd_plano_saude@public
+-- Active: 1793318293598@@127.0.0.1@5432@bd_plano_saude@public
 CREATE DATABASE bd_plano_saude;
 
 DROP TABLE IF EXISTS planilha_atendimento;
@@ -246,4 +246,84 @@ SELECT
 FROM
     paciente AS pad INNER JOIN pessoa as ped ON pad.pessoa_id = ped.id
     INNER JOIN paciente AS pat ON pad.titular_id = pat.pessoa_id
-    INNER JOIN pessoa AS pet ON pat.pessoa_id = pet.id
+    INNER JOIN pessoa AS pet ON pat.pessoa_id = pet.id;
+
+
+SELECT
+*
+FROM
+    consulta;
+
+
+
+SELECT
+    c.id AS consulta,
+    cv.nome AS convenio,
+    cv.id AS convenio_id
+FROM
+   consulta AS c  INNER JOIN convenio AS cv ON cv.id  = c.convenio_id;
+
+
+SELECT
+    c.id AS consulta,
+    cv.nome AS convenio,
+    cv.id AS convenio_id
+FROM
+   consulta AS c LEFT JOIN convenio AS cv ON cv.id = c.convenio_id;
+
+SELECT
+    c.id AS consulta,
+    cv.nome AS convenio,
+    cv.id AS convenio_id
+FROM
+   consulta AS c RIGHT JOIN convenio AS cv ON cv.id = c.convenio_id;
+
+
+SELECT
+    c.id AS consulta,
+    cv.nome AS convenio,
+    cv.id AS convenio_id,
+    c.paciente_id
+FROM
+   consulta AS c FULL JOIN convenio AS cv ON cv.id = c.convenio_id;
+
+
+
+SELECT
+    c.id AS consulta,
+    cv.nome AS convenio,
+    c.convenio_id AS convenio_id
+FROM
+   consulta AS c CROSS JOIN convenio AS cv;
+
+
+SELECT
+    ROUND(AVG(valor),2) AS valor
+FROM
+    consulta;
+
+
+SELECT
+    id,
+    valor
+FROM
+    consulta
+WHERE
+    valor > (SELECT AVG(valor)FROM consulta);
+
+
+
+SELECT
+    p.nome
+FROM
+    pessoa AS p 
+WHERE
+    p.id IN (SELECT paciente_id FROM consulta WHERE convenio_id IS NULL);
+
+
+SELECT
+    pe.nome,
+    pe.id
+FROM 
+    paciente AS pa JOIN pessoa AS pe ON pe.id = pa.pessoa_id
+WHERE NOT EXISTS (SELECT 1 FROM consulta AS c WHERE c.paciente_id = pa.pessoa_id);
